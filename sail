@@ -32,7 +32,7 @@ local function spawnPlatform()
         -- Create new platform
         local plat = Instance.new("Part")
         plat.Name = "epikplatform"
-        plat.Size = Vector3.new(70, 1, 70)
+        plat.Size = Vector3.new(200, 1, 200)
         plat.Anchored = true
         plat.BrickColor = BrickColor.new("Bright yellow")
         plat.Parent = workspace
