@@ -85,7 +85,7 @@ while true do
     local detected = false
     local holder = player:WaitForChild("PlayerGui"):WaitForChild("DungeonUI"):WaitForChild("ContentFrame"):WaitForChild("WaveFrame"):WaitForChild("Holder")
     for _, v in pairs(holder:GetChildren()) do
-        if v.Name == "TotalWavesAndCurrentWaveYouAreAt" and (v.Text == "81" or v.Text == "83") then
+        if v.Name == "TotalWavesAndCurrentWaveYouAreAt" and (v.Text == "81" or v.Text == "83" or v.Text == "85") then
             -- Reset character
             if player.Character and player.Character:FindFirstChild("Humanoid") then
                 player.Character.Humanoid.Health = 0
