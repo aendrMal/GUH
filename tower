@@ -1,4 +1,5 @@
 local player = game.Players.LocalPlayer
+print("workin")
 
 local function equipToolByName(toolName)
     local character = player.Character
