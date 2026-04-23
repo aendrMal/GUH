@@ -83,6 +83,9 @@ local function main()
             if not pressingVAtPositions then
                 -- Move to fallback positions
                 moveHumanoidTo(humanoid, location1)
+                moveHumanoidTo(humanoid, location1)
+                wait(1)
+                moveHumanoidTo(humanoid, location1)
                 moveHumanoidTo(humanoid, position2)
 				hrp.CFrame *= CFrame.Angles(0, math.rad(35), 0)
                 -- Start pressing V loop at fallback positions
