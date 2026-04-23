@@ -1,0 +1,105 @@
+local player = game.Players.LocalPlayer
+local hrp = player.Character.HumanoidRootPart
+local virtualInput = game:GetService("VirtualInputManager")
+local NPCsFolder = game.Workspace:WaitForChild("NPCs")
+
+local function pressLeftCtrl()
+    virtualInput:SendKeyEvent(true, Enum.KeyCode.LeftControl, false, game)
+    virtualInput:SendKeyEvent(false, Enum.KeyCode.LeftControl, false, game)
+end
+
+local function pressOne()
+    virtualInput:SendKeyEvent(true, Enum.KeyCode.One, false, game)
+    virtualInput:SendKeyEvent(false, Enum.KeyCode.One, false, game)
+end
+
+local function pressV()
+    virtualInput:SendKeyEvent(true, Enum.KeyCode.V, false, game)
+    virtualInput:SendKeyEvent(false, Enum.KeyCode.V, false, game)
+end
+
+local function pressX()
+    virtualInput:SendKeyEvent(true, Enum.KeyCode.X, false, game)
+    virtualInput:SendKeyEvent(false, Enum.KeyCode.X, false, game)
+end
+
+local function pressTwo()
+	virtualInput:SendKeyEvent(true, Enum.KeyCode.Two, false, game)
+	virtualInput:SendKeyEvent(false, Enum.KeyCode.Two, false, game)
+end
+
+local function moveHumanoidTo(humanoid, position)
+    humanoid:MoveTo(position)
+    local moveFinished = false
+    local connection
+    connection = humanoid.MoveToFinished:Connect(function(reached)
+        moveFinished = true
+        connection:Disconnect()
+    end)
+    while not moveFinished do
+        wait()
+    end
+end
+
+local function getNPC()
+    return NPCsFolder:FindFirstChild("CosmicBeingBoss_Normal")
+end
+
+local function main()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    
+    -- Positions
+    local position1 = Vector3.new(-1581, 3, 1682)
+    local position2 = Vector3.new(-1581, 3, 1886)
+    local location1 = Vector3.new(-1620, 3, 1944)
+    local location2 = Vector3.new(-1813, 3, 1944)
+    
+    -- Move to initial positions
+    pressLeftCtrl()
+    moveHumanoidTo(humanoid, position1)
+    moveHumanoidTo(humanoid, position2)
+    
+    local cosmicDetected = false
+    local pressingVAtPositions = false
+    
+    while true do
+        local cosmicBeing = getNPC()
+        if cosmicBeing then
+            -- Cosmic Being present: go to -1620, 3, 1944, then to -1813, 3, 1944
+            if not cosmicDetected then
+                moveHumanoidTo(humanoid, location1) -- Go to -1620, 3, 1944 first
+                moveHumanoidTo(humanoid, location2) -- Then move to -1813, 3, 1944
+				pressOne()
+				cosmicDetected = true
+            else
+                -- Already at position for Cosmic Being, just keep pressing V
+                moveHumanoidTo(humanoid, location2)
+            end
+            -- Keep pressing V at -1813, 3, 1944
+            pressV()
+        else
+            -- Cosmic Being absent: go back to fallback positions and press V repeatedly
+            if not pressingVAtPositions then
+                -- Move to fallback positions
+                moveHumanoidTo(humanoid, location1)
+                moveHumanoidTo(humanoid, position2)
+				hrp.CFrame *= CFrame.Angles(0, math.rad(33), 0)
+                -- Start pressing V loop at fallback positions
+                pressingVAtPositions = true
+            else
+                -- Already in fallback mode, keep pressing V
+                moveHumanoidTo(humanoid, position2)
+            end
+			pressTwo()
+            pressX()
+            moveHumanoidTo(humanoid, position2)
+			pressTwo()
+            pressX()
+            cosmicDetected = false
+        end
+        wait(1)
+    end
+end
+
+main()
