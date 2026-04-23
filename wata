@@ -1,0 +1,59 @@
+local player = game.Players.LocalPlayer
+local virtualInput = game:GetService("VirtualInputManager")
+local spawnPosition = Vector3.new(-1687, -8, 1422)
+local targetPosition = Vector3.new(-1723, -8, 1234)
+local targetPosition1 = Vector3.new(-1771, -8, 1026)
+local targetPosition2 = Vector3.new(-1776, -8, 728)
+
+local function pressLeftCtrl()
+    virtualInput:SendKeyEvent(true, Enum.KeyCode.LeftControl, false, game)
+    virtualInput:SendKeyEvent(false, Enum.KeyCode.LeftControl, false, game)
+end
+
+local function pressOne()
+    virtualInput:SendKeyEvent(true, Enum.KeyCode.One, false, game)
+    virtualInput:SendKeyEvent(false, Enum.KeyCode.One, false, game)
+end
+
+local function pressV()
+    virtualInput:SendKeyEvent(true, Enum.KeyCode.V, false, game)
+    virtualInput:SendKeyEvent(false, Enum.KeyCode.V, false, game)
+end
+
+player.CharacterAdded:Connect(function(character)
+    local humanoid = character:WaitForChild("Humanoid")
+    local peni = character:WaitForChild("HumanoidRootPart")
+    
+    -- Spawn at initial position
+    peni.CFrame = CFrame.new(spawnPosition)
+    wait(1)
+    
+    -- Optional: press LeftControl at start
+    pressLeftCtrl()
+
+    -- Helper function to move and wait
+    local function moveTo(position)
+        humanoid:MoveTo(position)
+        humanoid.MoveToFinished:Wait()
+    end
+
+    -- Move through the positions in order
+    moveTo(targetPosition)
+    moveTo(targetPosition1)
+    moveTo(targetPosition2)
+
+    -- After reaching all positions, press 'One'
+    pressOne()
+
+    -- Wait before starting to press 'V'
+    local initialDelay = 0.1
+    wait(initialDelay)
+
+    -- Loop to keep pressing 'V'
+    spawn(function()
+        while true do
+            wait(0.1)
+            pressV()
+        end
+    end)
+end)
