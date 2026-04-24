@@ -72,8 +72,10 @@ local function main()
                 moveHumanoidTo(humanoid, location2) -- Then move to -1813, 3, 1944
                 pressOne()
                 cosmicDetected = true
+                pressingVAtPositions = false
             else
                 -- Already at position for Cosmic Being, just keep pressing V
+                pressingVAtPositions = false
                 moveHumanoidTo(humanoid, location2)
             end
             -- Keep pressing V at -1813, 3, 1944
@@ -85,10 +87,9 @@ local function main()
                 moveHumanoidTo(humanoid, location1)
                 -- Then move to position2
                 moveHumanoidTo(humanoid, position2)
-                moveHumanoidTo(humanoid, location1)
-                moveHumanoidTo(humanoid, position2)
                 hrp.CFrame *= CFrame.Angles(0, math.rad(35), 0)
                 -- Start pressing V loop at fallback positions
+                wait(3)
                 pressingVAtPositions = true
             else
                 -- Already in fallback mode, move to position2
