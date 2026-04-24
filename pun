@@ -89,7 +89,6 @@ local function main()
                 pressingVAtPositions = true
             else
                 -- Already in fallback mode, keep pressing V
-                moveHumanoidTo(humanoid, location1)
                 moveHumanoidTo(humanoid, position2)
             end
 			pressTwo()
