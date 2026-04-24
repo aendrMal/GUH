@@ -87,9 +87,9 @@ local function main()
                 moveHumanoidTo(humanoid, location1)
                 -- Then move to position2
                 moveHumanoidTo(humanoid, position2)
-                hrp.CFrame *= CFrame.Angles(0, math.rad(35), 0)
+                hrp.CFrame *= CFrame.Angles(0, math.rad(36), 0)
                 -- Start pressing V loop at fallback positions
-                wait(3)
+                wait(1)
                 pressingVAtPositions = true
             else
                 -- Already in fallback mode, move to position2
