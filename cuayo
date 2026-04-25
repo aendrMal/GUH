@@ -83,7 +83,9 @@ local function main()
         else
             -- Cosmic Being absent: go back to fallback positions and press V repeatedly
             if not pressingVAtPositions then
-                -- Move to location1 first, wait for it to finish
+                wait(15)
+                pressV()
+                wait(15)
                 moveHumanoidTo(humanoid, location1)
                 -- Then move to position2
                 moveHumanoidTo(humanoid, position2)
