@@ -31,7 +31,9 @@ local ignoreNames = {
 	["Horse"] = true,
 	["Horse Nest"] = true,
 	["Turtle"] =  true,
-	["Turtle Nest"] = true
+	["Turtle Nest"] = true,
+	["Panda"] = true,
+	["Panda Nest"] = true
 }
 
 if plo then
