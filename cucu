@@ -1,18 +1,22 @@
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild("HumanoidRootPart")
+local displayName = ""
 
-local plo -- declare plo outside the loop
+local plo
 
--- Find plo based on your criteria
+if character and character:FindFirstChildOfClass("Humanoid") then
+    displayName = character:FindFirstChildOfClass("Humanoid").DisplayName
+end
+
 for i, v in ipairs(workspace.Plots:GetDescendants()) do
-    if v.Name == "Username" and v.Text == "Vingrium" then
+    if v.Name == "Username" and v.Text == displayName then
         plo = v.Parent.Parent.Parent.Parent
         break -- stop once found
     end
 end
 
--- Print the plo object if found
+
 if plo then
     print("Found PLO:", plo)
 else
@@ -30,11 +34,9 @@ local ignoreNames = {
 	["Turtle Nest"] = true
 }
 
--- Proceed with your operations if plo exists
 if plo then
     for _, model in ipairs(plo.Model.Plots:GetChildren()) do
         if model:IsA("Model") and not ignoreNames[model.Name] then
-            -- Move the model safely
             local success = pcall(function()
                 if model.PrimaryPart then
                     model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, -2, 0))
@@ -47,7 +49,6 @@ if plo then
                 end
             end)
             if success then
-                -- Disable collision on all parts
                 for _, part in ipairs(model:GetDescendants()) do
                     if part:IsA("BasePart") then
                         pcall(function()
