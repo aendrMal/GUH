@@ -33,7 +33,13 @@ local ignoreNames = {
 	["Turtle"] =  true,
 	["Turtle Nest"] = true,
 	["Panda"] = true,
-	["Panda Nest"] = true
+	["Panda Nest"] = true,
+	["GemDig"] = true,
+	["Common Egg"] = true,
+	["Uncommon Egg"] = true,
+	["Rare Egg"] = true,
+	["Legendary Egg"] = true,
+	["Mythic Egg"] = true,
 }
 
 if plo then
