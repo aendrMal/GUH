@@ -1,10 +1,11 @@
+local TweenService = game:GetService("TweenService")
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild("HumanoidRootPart")
 local displayName = ""
+local virtualInput = game:GetService("VirtualInputManager")
 
 local plo
-
 if character and character:FindFirstChildOfClass("Humanoid") then
     displayName = character:FindFirstChildOfClass("Humanoid").DisplayName
 end
@@ -12,13 +13,13 @@ end
 for i, v in ipairs(workspace.Plots:GetDescendants()) do
     if v.Name == "Username" and v.Text == displayName then
         plo = v.Parent.Parent.Parent.Parent
-        break -- stop once found
+        break
     end
 end
 
-
 if plo then
-    print("Found PLO:", plo)
+    print("Found Plot:", plo)
+    local gemDig = plo.Model.Plots:FindFirstChild("GemDig")
 else
     print("PLO not found!")
 end
@@ -28,21 +29,62 @@ local ignoreNames = {
     ["Snail"] = true,
     ["Snail Nest"] = true,
     ["Wooden Trellis"] = true,
-	["Horse"] = true,
-	["Horse Nest"] = true,
-	["Turtle"] =  true,
-	["Turtle Nest"] = true,
-	["Panda"] = true,
-	["Panda Nest"] = true,
-	["Red Panda"] = true,
-	["Red Panda Nest"] = true,
-	["GemDig"] = true,
-	["Common Egg"] = true,
-	["Uncommon Egg"] = true,
-	["Rare Egg"] = true,
-	["Legendary Egg"] = true,
-	["Mythic Egg"] = true,
+    ["Horse"] = true,
+    ["Horse Nest"] = true,
+    ["Turtle"] =  true,
+    ["Turtle Nest"] = true,
+    ["Panda"] = true,
+    ["Panda Nest"] = true,
+    ["Red Panda"] = true,
+    ["Red Panda Nest"] = true,
+    ["GemDig"] = true,
+    ["Common Egg"] = true,
+    ["Uncommon Egg"] = true,
+    ["Rare Egg"] = true,
+    ["Legendary Egg"] = true,
+    ["Mythic Egg"] = true,
 }
+
+if getgenv().tweenLoopRunning == nil then
+    getgenv().tweenLoopRunning = false
+end
+
+local function tweenAndPressE()
+    local startPosition = hrp.CFrame
+    local gemDigModel = plo.Model.Plots:FindFirstChild("GemDig")
+    
+    if not gemDigModel or not gemDigModel.PrimaryPart then
+        return
+    end
+    
+    local targetCFrame = gemDigModel.PrimaryPart.CFrame
+    local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+    local tweenToGem = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
+    tweenToGem:Play()
+    while tweenToGem.PlaybackState ~= Enum.PlaybackState.Completed do
+        wait()
+    end
+
+    virtualInput:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+    wait(0.5)
+    virtualInput:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+
+    local tweenBack = TweenService:Create(hrp, tweenInfo, {CFrame = startPosition})
+    tweenBack:Play()
+    while tweenBack.PlaybackState ~= Enum.PlaybackState.Completed do
+        wait()
+    end
+end
+
+if plo then
+    getgenv().tweenLoopRunning = true
+    coroutine.wrap(function()
+        while getgenv().tweenLoopRunning do
+            tweenAndPressE()
+            wait(1)
+        end
+    end)()
+end
 
 if plo then
     for _, model in ipairs(plo.Model.Plots:GetChildren()) do
@@ -71,3 +113,5 @@ if plo then
         end
     end
 end
+
+-- getgenv().tweenLoopRunning = false
