@@ -38,12 +38,14 @@ local ignoreNames = {
     ["Panda Nest"] = true,
     ["Red Panda"] = true,
     ["Red Panda Nest"] = true,
+    ["T-Rex"] = true,
+    ["T-Rex Nest"] = true,
     ["GemDig"] = true,
     ["Common Egg"] = true,
     ["Uncommon Egg"] = true,
     ["Rare Egg"] = true,
     ["Legendary Egg"] = true,
-    ["Mythic Egg"] = true,
+    ["Mythic Egg"] = true
 }
 
 -- Initialize the toggle variable
