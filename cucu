@@ -1,4 +1,5 @@
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild("HumanoidRootPart")
@@ -42,21 +43,20 @@ local ignoreNames = {
     ["Uncommon Egg"] = true,
     ["Rare Egg"] = true,
     ["Legendary Egg"] = true,
-    ["Mythic Egg"] = true
+    ["Mythic Egg"] = true,
 }
 
+-- Initialize the toggle variable
 if getgenv().tweenLoopRunning == nil then
     getgenv().tweenLoopRunning = false
 end
 
 local function tweenAndPressE()
     local startPosition = hrp.CFrame
-    local gemDigModel = plo.Model.Plots:FindFirstChild("GemDig")
-    
+    local gemDigModel = plo and plo.Model.Plots:FindFirstChild("GemDig")
     if not gemDigModel or not gemDigModel.PrimaryPart then
         return
     end
-    
     local targetCFrame = gemDigModel.PrimaryPart.CFrame
     local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
     local tweenToGem = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
@@ -64,11 +64,11 @@ local function tweenAndPressE()
     while tweenToGem.PlaybackState ~= Enum.PlaybackState.Completed do
         wait()
     end
-
+    -- Press E
     virtualInput:SendKeyEvent(true, Enum.KeyCode.E, false, game)
     wait(0.5)
     virtualInput:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-
+    -- Tween back
     local tweenBack = TweenService:Create(hrp, tweenInfo, {CFrame = startPosition})
     tweenBack:Play()
     while tweenBack.PlaybackState ~= Enum.PlaybackState.Completed do
@@ -76,42 +76,58 @@ local function tweenAndPressE()
     end
 end
 
-if plo then
-    getgenv().tweenLoopRunning = true
-    coroutine.wrap(function()
-        while getgenv().tweenLoopRunning do
+-- Toggle function for R key
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.R then
+        getgenv().tweenLoopRunning = not getgenv().tweenLoopRunning
+        if getgenv().tweenLoopRunning then
+            print("Tween Loop Started")
+        else
+            print("Tween Loop Stopped")
+        end
+    end
+end)
+
+-- Main loop
+coroutine.wrap(function()
+    while true do
+        if getgenv().tweenLoopRunning then
             tweenAndPressE()
             wait(1)
-        end
-    end)()
-end
-
-if plo then
-    for _, model in ipairs(plo.Model.Plots:GetChildren()) do
-        if model:IsA("Model") and not ignoreNames[model.Name] then
-            local success = pcall(function()
-                if model.PrimaryPart then
-                    model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, -2, 0))
-                else
-                    for _, part in ipairs(model:GetDescendants()) do
-                        if part:IsA("BasePart") then
-                            part.CFrame = hrp.CFrame * CFrame.new(0, -2, 0)
+            if plo then
+                for _, model in ipairs(plo.Model.Plots:GetChildren()) do
+                    if model:IsA("Model") and not ignoreNames[model.Name] then
+                        local success = pcall(function()
+                            if model.PrimaryPart then
+                                model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, -2, 0))
+                            else
+                                for _, part in ipairs(model:GetDescendants()) do
+                                    if part:IsA("BasePart") then
+                                        part.CFrame = hrp.CFrame * CFrame.new(0, -2, 0)
+                                    end
+                                end
+                            end
+                        end)
+                        if success then
+                            for _, part in ipairs(model:GetDescendants()) do
+                                if part:IsA("BasePart") then
+                                    pcall(function()
+                                        part.Size = Vector3.new(1, 1, 1)
+                                        part.CanCollide = false
+                                    end)
+                                end
+                            end
                         end
                     end
                 end
-            end)
-            if success then
-                for _, part in ipairs(model:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        pcall(function()
-                            part.Size = Vector3.new(1, 1, 1)
-                            part.CanCollide = false
-                        end)
-                    end
-                end
             end
+            wait(2)
+        else
+            wait(0.5)
         end
     end
-end
+end)()
 
--- getgenv().tweenLoopRunning = false
+virtualInput:SendKeyEvent(true, Enum.KeyCode.R, false, game)
+virtualInput:SendKeyEvent(false, Enum.KeyCode.R, false, game)
