@@ -42,7 +42,7 @@ local ignoreNames = {
     ["Uncommon Egg"] = true,
     ["Rare Egg"] = true,
     ["Legendary Egg"] = true,
-    ["Mythic Egg"] = true,
+    ["Mythic Egg"] = true
 }
 
 if getgenv().tweenLoopRunning == nil then
