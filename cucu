@@ -27,6 +27,9 @@ end
 
 local ignoreNames = {
     ["Farmer Statue"] = true,
+    ["Well"] = true,
+    ["Early Supporter 1"] = true,
+    ["Golden Capybara Statue"] = true,
     ["Snail"] = true,
     ["Snail Nest"] = true,
     ["Wooden Trellis"] = true,
