@@ -114,6 +114,7 @@ coroutine.wrap(function()
                                 for _, part in ipairs(model:GetDescendants()) do
                                     if part:IsA("BasePart") then
                                         part.CFrame = hrp.CFrame * CFrame.new(0, -2, 0)
+                                        part.CanCollide = false
                                     end
                                 end
                             end
