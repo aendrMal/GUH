@@ -1,40 +1,22 @@
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local player = game.Players.LocalPlayer
-local character = nil
-local hrp = nil
-
--- Function to wait for character and HumanoidRootPart
-local function waitForCharacter()
-    repeat
-        character = player.Character or player.CharacterAdded:Wait()
-        hrp = character:FindFirstChild("HumanoidRootPart")
-        task.wait(0.5)
-    until hrp
-end
-
--- Initial wait for character spawn
-waitForCharacter()
-
--- Monitor if character falls into the void
-task.spawn(function()
-    while true do
-        if hrp and hrp.Position.Y < -50 then -- threshold for falling into the void
-            print("Character fell into the void, waiting for respawn...")
-            waitForCharacter()
-        end
-        task.wait(1)
-    end
-end)
-
+local character = player.Character or player.CharacterAdded:Wait()
+local hrp = character:WaitForChild("HumanoidRootPart")
 local displayName = ""
+local virtualInput = game:GetService("VirtualInputManager")
+local camera = workspace.CurrentCamera
+local viewportSize = camera.ViewportSize
+local centerX = viewportSize.X / 2
+local centerY = viewportSize.Y / 2
+local scythe = player:WaitForChild("Systems"):WaitForChild("Tools"):WaitForChild("Scythe")
+
+local plo
 if character and character:FindFirstChildOfClass("Humanoid") then
     displayName = character:FindFirstChildOfClass("Humanoid").DisplayName
 end
 
--- Find the plot object
-local plo
-for _, v in ipairs(workspace.Plots:GetDescendants()) do
+for i, v in ipairs(workspace.Plots:GetDescendants()) do
     if v.Name == "Username" and v.Text == displayName then
         plo = v.Parent.Parent.Parent.Parent
         break
@@ -43,10 +25,7 @@ end
 
 if plo then
     print("Found Plot:", plo)
-    -- Check for GemDig model safely
-    if plo:FindFirstChild("Model") and plo.Model:FindFirstChild("Plots") then
-        local gemDig = plo.Model.Plots:FindFirstChild("GemDig")
-    end
+    local gemDig = plo.Model.Plots:FindFirstChild("GemDig")
 else
     print("PLO not found!")
 end
@@ -81,53 +60,37 @@ local ignoreNames = {
     ["Mythic Egg"] = true
 }
 
--- Initialize toggle variable
+-- Initialize the toggle variable
 if getgenv().tweenLoopRunning == nil then
     getgenv().tweenLoopRunning = false
 end
 
 local function tweenAndPressE()
-    -- Wait for HRP to be valid
-    if not hrp then return end
     local startPosition = hrp.CFrame
-    local gemDigModel = (plo and plo:FindFirstChild("Model") and plo.Model:FindFirstChild("GemDig"))
+    local gemDigModel = plo and plo.Model.Plots:FindFirstChild("GemDig")
     if not gemDigModel or not gemDigModel.PrimaryPart then
         return
     end
-
-    local targetPosition = gemDigModel.PrimaryPart.CFrame.Position
-
-    -- Tween position instead of CFrame
+    local targetCFrame = gemDigModel.PrimaryPart.CFrame
     local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-    local tweenToGem = TweenService:Create(hrp, tweenInfo, {Position = targetPosition})
+    local tweenToGem = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame * CFrame.new(0,3,0)})
     tweenToGem:Play()
-
-    -- Wait for tween to complete with timeout
-    local tweenTimeout = 2 -- seconds
-    local elapsed = 0
-    while tweenToGem.PlaybackState ~= Enum.PlaybackState.Completed and elapsed < tweenTimeout do
-        task.wait(0.1)
-        elapsed = elapsed + 0.1
+    while tweenToGem.PlaybackState ~= Enum.PlaybackState.Completed do
+        wait()
     end
-
-    -- Send "E" key press
+    -- Press E
     virtualInput:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-    task.wait(0.2)
+    wait(0.5)
     virtualInput:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-
-    -- Tween back to original position
-    local tweenBack = TweenService:Create(hrp, tweenInfo, {Position = startPosition.Position})
+    -- Tween back
+    local tweenBack = TweenService:Create(hrp, tweenInfo, {CFrame = startPosition * CFrame.new(0,0.5,0)})
     tweenBack:Play()
-
-    -- Wait for the second tween to complete with timeout
-    local elapsedBack = 0
-    while tweenBack.PlaybackState ~= Enum.PlaybackState.Completed and elapsedBack < tweenTimeout do
-        task.wait(0.1)
-        elapsedBack = elapsedBack + 0.1
+    while tweenBack.PlaybackState ~= Enum.PlaybackState.Completed do
+        wait()
     end
 end
 
--- Toggle loop with R key
+-- Toggle function for R key
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.R then
@@ -141,67 +104,63 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 end)
 
 -- Main loop
-task.spawn(function()
+coroutine.wrap(function()
     while true do
         if getgenv().tweenLoopRunning then
-            -- Check if character is valid before running
-            if hrp then
-                tweenAndPressE()
-
-                task.wait(1)
-
-                if plo and plo:FindFirstChild("Model") and plo.Model:FindFirstChild("Plots") then
-                    for _, model in ipairs(plo.Model.Plots:GetChildren()) do
-                        if model:IsA("Model") and not ignoreNames[model.Name] then
-                            -- Safely set position
-                            local success, err = pcall(function()
-                                if model.PrimaryPart then
-                                    model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, -2, 0))
-                                else
-                                    for _, part in ipairs(model:GetDescendants()) do
-                                        if part:IsA("BasePart") then
-                                            part.CFrame = hrp.CFrame * CFrame.new(0, -2, 0)
-                                            part.CanCollide = false
-                                        end
-                                    end
-                                end
-                            end)
-                            if success then
-                                -- Optional: resize parts
+            tweenAndPressE()
+            wait(1)
+            if plo then
+                for _, model in ipairs(plo.Model.Plots:GetChildren()) do
+                    if model:IsA("Model") and not ignoreNames[model.Name] then
+                        local success = pcall(function()
+                            if model.PrimaryPart then
+                                model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, -2, 0))
+                            else
                                 for _, part in ipairs(model:GetDescendants()) do
                                     if part:IsA("BasePart") then
-                                        pcall(function()
-                                            part.Size = Vector3.new(1, 1, 1)
-                                            part.CanCollide = false
-                                        end)
+                                        part.CFrame = hrp.CFrame * CFrame.new(0, -2, 0)
+                                        part.CanCollide = false
                                     end
                                 end
                             end
-                            -- Handle "Sell_Crops" button
-                            for _, m in ipairs(plo.Model.Sell_Main:GetChildren()) do
-                                if m.Name == "Sell_Crops" then
+                        end)                 
+                        if success then
+                            for _, part in ipairs(model:GetDescendants()) do
+                                if part:IsA("BasePart") then
                                     pcall(function()
-                                        if m:IsA("BasePart") then
-                                            m.CFrame = hrp.CFrame * CFrame.new(0, -2, 0)
-                                            m.CanCollide = false
-                                        end
+                                        part.Size = Vector3.new(1, 1, 1)
+                                        part.CanCollide = false
                                     end)
                                 end
                             end
+                        end                    
+                        for _, m in ipairs(plo.Model.Sell_Main:GetChildren()) do
+                            if m.Name == "Sell_Crops" then
+                                pcall(function()
+                                    if m:IsA("BasePart") then
+                                        m.CFrame = hrp.CFrame * CFrame.new(0, -2, 0)
+                                        m.CanCollide = false
+                                    end
+                                end)
+                            end
                         end
-                    end
-                end
-                task.wait(2)
-            else
-                -- HRP no longer valid, wait and retry
-                waitForCharacter()
-            end
+                        pcall(function()
+                            if scythe then
+ 							   scythe.Parent = character
+							end
+                            virtualInput:SendMouseButtonEvent(centerX, centerY, 0, true, game, 1)
+                            wait(0.01)
+                            virtualInput:SendMouseButtonEvent(centerX, centerY, 0, false, game, 1)
+                        end)
+                    end -- end of "if model:IsA() and not ignoreNames"
+                end -- end of models loop
+            end -- end of "if plo"
+            wait(2)
         else
-            task.wait(0.5)
+            wait(0.5)
         end
     end
 end)()
 
--- Optional: send "R" key at start
 virtualInput:SendKeyEvent(true, Enum.KeyCode.R, false, game)
 virtualInput:SendKeyEvent(false, Enum.KeyCode.R, false, game)
