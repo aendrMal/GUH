@@ -1,0 +1,97 @@
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+
+-- Create UI for logs
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+
+local logFrame = Instance.new("ScrollingFrame", screenGui)
+logFrame.Size = UDim2.new(0, 300, 0, 400)
+logFrame.Position = UDim2.new(0, 10, 0, 10)
+logFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+logFrame.ScrollBarThickness = 8
+logFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+logFrame.BorderSizePixel = 2
+logFrame.BorderColor3 = Color3.new(1, 1, 1)
+
+local function addLog(text)
+    local label = Instance.new("TextLabel")
+    label.Text = text
+    label.Size = UDim2.new(1, 0, 0, 20)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = logFrame
+    -- Update CanvasSize to fit new labels
+    logFrame.CanvasSize = UDim2.new(0, 0, 0, logFrame.CanvasSize.Y.Offset + 20)
+end
+
+-- Create Clipboard Button
+local clipboardButton = Instance.new("TextButton", screenGui)
+clipboardButton.Size = UDim2.new(0, 100, 0, 30)
+clipboardButton.Position = UDim2.new(0, 10, 0, 420)
+clipboardButton.Text = "Copy Log"
+clipboardButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+clipboardButton.TextColor3 = Color3.new(1, 1, 1)
+clipboardButton.BorderSizePixel = 2
+
+local function getAllLogText()
+    local allText = ""
+    for _, label in ipairs(logFrame:GetChildren()) do
+        if label:IsA("TextLabel") then
+            allText = allText .. label.Text .. "\n"
+        end
+    end
+    return allText
+end
+
+local function copyToClipboard(text)
+    -- Roblox doesn't have a built-in clipboard API, but we can use the "SetClipboard" method if available
+    pcall(function()
+        UserInputService:SetClipboard(text)
+    end)
+end
+
+clipboardButton.MouseButton1Click:Connect(function()
+    local text = getAllLogText()
+    copyToClipboard(text)
+end)
+
+local function hookRemote(remote)
+    -- Wrap FireServer for RemoteEvent
+    if remote:IsA("RemoteEvent") then
+        local originalFireServer = remote.FireServer
+        remote.FireServer = function(self, ...)
+            local args = {...}
+            local argsString = table.concat(args, ", ")
+            addLog("FireServer: " .. remote.Name .. " args: " .. argsString)
+            return originalFireServer(self, ...)
+        end
+    end
+
+    -- Wrap InvokeServer for RemoteFunction
+    if remote:IsA("RemoteFunction") then
+        local originalInvokeServer = remote.InvokeServer
+        remote.InvokeServer = function(self, ...)
+            local args = {...}
+            local argsString = table.concat(args, ", ")
+            addLog("InvokeServer: " .. remote.Name .. " args: " .. argsString)
+            return originalInvokeServer(self, ...)
+        end
+    end
+end
+
+-- Hook into existing remotes
+for _, remote in ipairs(replicatedStorage:GetDescendants()) do
+    if remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction") then
+        hookRemote(remote)
+    end
+end
+
+-- Hook into new remotes added dynamically
+replicatedStorage.DescendantAdded:Connect(function(child)
+    if child:IsA("RemoteEvent") or child:IsA("RemoteFunction") then
+        hookRemote(child)
+    end
+end)
