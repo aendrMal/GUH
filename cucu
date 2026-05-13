@@ -1,4 +1,10 @@
 while true do
 game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SellCrates"):FireServer()
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Gear"):WaitForChild("Transaction"):InvokeServer({"Normal Fertilizer"})
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Gear"):WaitForChild("Transaction"):InvokeServer({"Strong Fertilizer"})
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Gear"):WaitForChild("Transaction"):InvokeServer({"Super Fertilizer"})
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Gear"):WaitForChild("Transaction"):InvokeServer({"Acid Spray"})
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Gear"):WaitForChild("Transaction"):InvokeServer({"Void Spray"})
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Gear"):WaitForChild("Transaction"):InvokeServer({"Radioactive Spray"})
 wait(30)
 end
