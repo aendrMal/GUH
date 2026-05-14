@@ -6,5 +6,6 @@ game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Gear"
 game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Gear"):WaitForChild("Transaction"):InvokeServer("Acid Spray")
 game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Gear"):WaitForChild("Transaction"):InvokeServer("Void Spray")
 game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Gear"):WaitForChild("Transaction"):InvokeServer("Radioactive Spray")
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Gear"):WaitForChild("Transaction"):InvokeServer("Rainbow Spray")
 wait(30)
 end
